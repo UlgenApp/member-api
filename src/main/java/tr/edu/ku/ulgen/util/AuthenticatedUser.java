@@ -6,8 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import tr.edu.ku.ulgen.entity.User;
 import tr.edu.ku.ulgen.repository.UserRepository;
 
-import java.util.Optional;
-
 @Data
 public class AuthenticatedUser {
     private final UserRepository userRepository;

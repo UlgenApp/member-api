@@ -14,6 +14,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 
     @Modifying
-    @Query("UPDATE User u SET u.additionalInfo = :additionalInfo WHERE u.email = :username")
-    Boolean updateAdditionalInfo(String username, String additionalInfo);
+    @Query("UPDATE User u SET u.additionalInfo = ?1 WHERE u.id = ?2")
+    Integer updateAdditionalInfo(String additionalInfo, Long userId);
 }
