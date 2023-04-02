@@ -21,8 +21,8 @@ public class UserDataController {
     @PostMapping("/update/additional-info")
     public ResponseEntity<?> updateAdditionalInfo(@RequestBody AdditionalInfoDto additionalInfoDto) {
         log.info("Update Additional Info request is received: {}", additionalInfoDto);
-        
+
         Boolean isUpdated = userDataService.updateAdditionalInfo(additionalInfoDto);
-        return isUpdated ? ResponseEntity.ok().build(): ResponseEntity.badRequest().build();
+        return isUpdated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
     }
 }
