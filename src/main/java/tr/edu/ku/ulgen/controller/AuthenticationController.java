@@ -23,22 +23,22 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
 
-        log.info("Register request is received: {}", registerDto);
+        log.info("Register request is received: {}", registerDto.getEmail());
         AuthenticationResponse authenticationResponse = service.register(registerDto);
 
         if (authenticationResponse == null) {
-            log.error("Register failed for: {}", registerDto);
+            log.error("Register failed for: {}", registerDto.getEmail());
             return ResponseEntity.badRequest().build();
         }
 
-        log.info("Register successful for: {}", registerDto);
+        log.info("Register successful for: {}", registerDto.getEmail());
         return ResponseEntity.ok(authenticationResponse);
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationDto authenticationDto) {
 
-        log.info("Login request is received: {}", authenticationDto);
+        log.info("Login request is received: {}", authenticationDto.getEmail());
         return ResponseEntity.ok(service.authenticate(authenticationDto));
     }
 }

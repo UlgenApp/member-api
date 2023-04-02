@@ -32,7 +32,7 @@ public class AuthenticationService {
         boolean mailExists = userRepository.existsByEmail(registerDto.getEmail());
 
         if (mailExists) {
-            log.error("Mail could not found in database for: {}", registerDto);
+            log.error("Mail could not found in database for: {}", registerDto.getEmail());
             return null;
         }
 
