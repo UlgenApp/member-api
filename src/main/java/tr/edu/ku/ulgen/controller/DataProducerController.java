@@ -1,6 +1,7 @@
 package tr.edu.ku.ulgen.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,19 +16,23 @@ import tr.edu.ku.ulgen.util.AuthenticatedUser;
 @RestController
 @RequestMapping("/api/v1/producer")
 @AllArgsConstructor
+@Slf4j
 public class DataProducerController {
     private ProducerClient producerClient;
     private UserRepository userRepository;
 
     @PostMapping("/produce")
-    public ResponseEntity<?> produce(@RequestBody ProducerDataDto request) {
+    public ResponseEntity<?> produce(@RequestBody ProducerDataDto producerDataDto) {
+
+        log.info("Produce request is received: {}", producerDataDto);
         AuthenticatedUser authenticatedUser = new AuthenticatedUser(userRepository);
+
         return ResponseEntity.ok(
                 producerClient.produceData(ProducerDto.builder()
                         .userId(authenticatedUser.getAuthenticatedUser().getId())
-                        .location(request.getLocation())
-                        .activeUser(request.getActiveUser())
-                        .userCity(request.getUserCity())
+                        .location(producerDataDto.getLocation())
+                        .activeUser(producerDataDto.getActiveUser())
+                        .userCity(producerDataDto.getUserCity())
                         .build())
         );
     }
