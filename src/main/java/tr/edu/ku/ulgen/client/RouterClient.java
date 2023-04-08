@@ -1,7 +1,7 @@
 package tr.edu.ku.ulgen.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import tr.edu.ku.ulgen.dto.RouteDataDto;
@@ -10,5 +10,5 @@ import tr.edu.ku.ulgen.dto.RouteDataDto;
 public interface RouterClient {
 
     @PostMapping("/api/v1/route")
-    ResponseEntity<?> route(@RequestBody RouteDataDto routeDataDto);
+    JsonNode route(@RequestBody RouteDataDto routeDataDto);
 }

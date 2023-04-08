@@ -1,5 +1,6 @@
 package tr.edu.ku.ulgen.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,20 @@ public class RouteService {
                         .longitude(ulgenData.getLongitude()).build())
                 .toList();
 
-        return ResponseEntity.ok(routerClient.route(RouteDataDto.builder()
+
+        RouteDataDto routeDataDto = RouteDataDto.builder()
                 .epsilon(routeDto.getEpsilon())
                 .vehicle_count(routeDto.getVehicleCount())
                 .depot(routeDto.getDepot())
                 .location(affectedLocations)
-                .build()));
+                .build();
+
+        log.info("Fetched database and built: {}", routeDataDto.toString());
+
+        JsonNode response = routerClient.route(routeDataDto);
+
+        log.info("Got Response from Router Endpoint: {}", response.toString());
+
+        return ResponseEntity.ok(response);
     }
 }
