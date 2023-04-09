@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import tr.edu.ku.ulgen.util.Location;
 
-import java.util.List;
-
 @Data
 @Builder
 public class ProducerDto {
