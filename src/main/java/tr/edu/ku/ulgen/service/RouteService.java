@@ -24,7 +24,7 @@ public class RouteService {
 
     public ResponseEntity<?> route(RouteDto routeDto) {
 
-        if (ulgenConfigService.isAlerted()) {
+        if (!ulgenConfigService.isAlerted()) {
             return ResponseEntity.badRequest().build();
         }
 

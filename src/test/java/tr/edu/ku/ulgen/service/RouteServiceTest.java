@@ -58,7 +58,7 @@ public class RouteServiceTest {
 
         when(ulgenDataRepository.findByUserCityIn(routeDto.getCities())).thenReturn(ulgenDataList);
 
-        when(ulgenConfigService.isAlerted()).thenReturn(false);
+        when(ulgenConfigService.isAlerted()).thenReturn(true);
 
         when(affectedDataService.getAffectedCities()).thenReturn(routeDto.getCities());
 
