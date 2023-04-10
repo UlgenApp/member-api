@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tr.edu.ku.ulgen.dto.AffectedCitiesDto;
 import tr.edu.ku.ulgen.dto.AlertedDto;
 import tr.edu.ku.ulgen.service.AffectedDataService;
@@ -23,14 +20,15 @@ public class AdminOperationsController {
     private final AffectedDataService affectedDataService;
 
     @PostMapping("/set-alerted")
-    public ResponseEntity<Void> setAlertedValue(AlertedDto alertedDto) {
+    public ResponseEntity<?> setAlertedValue(@RequestBody AlertedDto alertedDto) {
+        log.info("Set Alerted endpoint has been called: {}", alertedDto);
         ulgenConfigService.setConfigPropertyValue("alerted", alertedDto.getAlerted());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/set-affected-cities")
-    public ResponseEntity<Void> setAffectedCities(AffectedCitiesDto affectedCitiesDto) {
+    public ResponseEntity<?> setAffectedCities(@RequestBody AffectedCitiesDto affectedCitiesDto) {
         affectedDataService.setAffectedCities(affectedCitiesDto.getCityNames(), affectedCitiesDto.getValue());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }

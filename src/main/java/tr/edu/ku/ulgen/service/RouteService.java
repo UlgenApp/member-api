@@ -31,6 +31,9 @@ public class RouteService {
         List<String> affectedCities = affectedDataService.getAffectedCities();
         List<String> cities = routeDto.getCities();
 
+        log.info("Affected cities, {}", affectedCities);
+        log.info("Cities, {}", cities);
+
         if (cities.stream().anyMatch(city -> !affectedCities.contains(city))) {
             return ResponseEntity.unprocessableEntity().build();
         }

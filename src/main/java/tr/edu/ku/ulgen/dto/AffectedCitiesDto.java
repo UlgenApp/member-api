@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class AffectedCitiesDto {
     private List<String> cityNames;
-    private Boolean value;
+    private Boolean affected;
 }
