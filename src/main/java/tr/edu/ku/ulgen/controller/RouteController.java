@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tr.edu.ku.ulgen.dto.RouteDto;
+import tr.edu.ku.ulgen.response.AffectedCitiesResponse;
 import tr.edu.ku.ulgen.service.AffectedDataService;
 import tr.edu.ku.ulgen.service.RouteService;
 import tr.edu.ku.ulgen.service.UlgenConfigService;
@@ -25,7 +26,9 @@ public class RouteController {
     @GetMapping("/affected-cities")
     public ResponseEntity<?> getAffectedCities() {
         if (ulgenConfigService.isAlerted()) {
-            return ResponseEntity.ok(affectedDataService.getAffectedCities());
+            return ResponseEntity.ok(AffectedCitiesResponse.builder()
+                    .affectedCities(affectedDataService.getAffectedCities())
+                    .build());
         }
 
         return ResponseEntity.badRequest().build();
