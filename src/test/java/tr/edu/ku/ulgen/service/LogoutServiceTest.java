@@ -1,17 +1,16 @@
 package tr.edu.ku.ulgen.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import tr.edu.ku.ulgen.entity.Token;
 import tr.edu.ku.ulgen.repository.TokenRepository;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
 
@@ -20,22 +19,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class LogoutServiceTest {
 
+    private final String sampleToken = "sample_jwt_token";
     @InjectMocks
     private LogoutService logoutService;
-
     @Mock
     private TokenRepository tokenRepository;
-
     @Mock
     private HttpServletRequest request;
-
     @Mock
     private HttpServletResponse response;
-
     @Mock
     private Authentication authentication;
-
-    private final String sampleToken = "sample_jwt_token";
 
     @BeforeEach
     public void setUp() {
