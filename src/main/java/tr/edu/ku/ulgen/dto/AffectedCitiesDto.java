@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class AffectedCitiesDto {
-    private List<String> cityNames;
+    private List<String> cities;
     private Boolean affected;
 }
