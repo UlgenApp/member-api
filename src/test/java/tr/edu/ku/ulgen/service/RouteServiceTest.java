@@ -34,6 +34,12 @@ public class RouteServiceTest {
     @Mock
     private UlgenDataRepository ulgenDataRepository;
 
+    @Mock
+    private UlgenConfigService ulgenConfigService;
+
+    @Mock
+    private AffectedDataService affectedDataService;
+
     @Test
     public void shouldReturnRoute() throws JsonProcessingException {
 
@@ -51,6 +57,10 @@ public class RouteServiceTest {
         );
 
         when(ulgenDataRepository.findByUserCityIn(routeDto.getCities())).thenReturn(ulgenDataList);
+
+        when(ulgenConfigService.isAlerted()).thenReturn(false);
+
+        when(affectedDataService.getAffectedCities()).thenReturn(routeDto.getCities());
 
         ObjectMapper objectMapper = new ObjectMapper();
         String routerResponseJson = "{\"result\": \"sample data\"}";
