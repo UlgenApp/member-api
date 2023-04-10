@@ -22,7 +22,7 @@ public class AdminOperationsController {
     private final UlgenConfigService ulgenConfigService;
     private final AffectedDataService affectedDataService;
 
-    @PutMapping("/set-alerted")
+    @PostMapping("/set-alerted")
     public ResponseEntity<Void> setAlertedValue(AlertedDto alertedDto) {
         ulgenConfigService.setConfigPropertyValue("alerted", alertedDto.getAlerted());
         return new ResponseEntity<>(HttpStatus.OK);
