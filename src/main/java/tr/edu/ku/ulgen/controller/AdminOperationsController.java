@@ -28,7 +28,7 @@ public class AdminOperationsController {
 
     @PostMapping("/set-affected-cities")
     public ResponseEntity<?> setAffectedCities(@RequestBody AffectedCitiesDto affectedCitiesDto) {
-        affectedDataService.setAffectedCities(affectedCitiesDto.getCityNames(), affectedCitiesDto.getValue());
+        affectedDataService.setAffectedCities(affectedCitiesDto.getCities(), affectedCitiesDto.getAffected());
         return ResponseEntity.ok().build();
     }
 }
