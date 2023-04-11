@@ -1,10 +1,10 @@
 package tr.edu.ku.ulgen.service;
 
 
+import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tr.edu.ku.ulgen.entity.UlgenConfig;
 import tr.edu.ku.ulgen.repository.UlgenConfigRepository;
 
@@ -17,23 +17,47 @@ public class UlgenConfigService {
     private UlgenConfigRepository configRepository;
 
     public Boolean isAlerted() {
-        Boolean configValue = getConfigPropertyValue("alerted");
-        return configValue != null ? configValue : Boolean.FALSE;
+        return getConfigPropertyValue("alerted");
     }
 
 
     public Boolean getConfigPropertyValue(String configPropertyName) {
-        Optional<UlgenConfig> configOptional = configRepository.findById(configPropertyName);
+        Optional<UlgenConfig> configOptional;
+
+        try {
+            configOptional = configRepository.findById(configPropertyName);
+        } catch (PersistenceException e) {
+            log.error("Could not called findById on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return null;
+        }
+
         return configOptional.map(UlgenConfig::getConfigPropertyValue).orElse(null);
     }
 
     public void setConfigPropertyValue(String configPropertyName, Boolean value) {
-        Optional<UlgenConfig> configOptional = configRepository.findById(configPropertyName);
+        Optional<UlgenConfig> configOptional;
+
+        try {
+            configOptional = configRepository.findById(configPropertyName);
+        } catch (PersistenceException e) {
+            log.error("Could not called findById on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return;
+        }
+
+
         if (configOptional.isPresent()) {
             log.info("Config is found, updating.");
             UlgenConfig config = configOptional.get();
             config.setConfigPropertyValue(value);
-            configRepository.save(config);
+
+            try {
+                configRepository.save(config);
+            } catch (PersistenceException e) {
+                log.error("Could not saved config to the database.");
+                log.error("Database is not reachable, {}", e.getMessage());
+            }
         } else {
             log.info("Config is not found, creating.");
             UlgenConfig ulgenConfig = UlgenConfig.builder()
@@ -41,7 +65,12 @@ public class UlgenConfigService {
                     .configPropertyValue(value)
                     .build();
 
-            configRepository.save(ulgenConfig);
+            try {
+                configRepository.save(ulgenConfig);
+            } catch (PersistenceException e) {
+                log.error("Could not saved config to the database.");
+                log.error("Database is not reachable, {}", e.getMessage());
+            }
         }
     }
 }

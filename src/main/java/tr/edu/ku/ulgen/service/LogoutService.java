@@ -1,5 +1,6 @@
 package tr.edu.ku.ulgen.service;
 
+import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +34,31 @@ public class LogoutService implements LogoutHandler {
         jwt = authHeader.substring(7);
 
         log.info("Trying to find stored token.");
-        Token storedToken = tokenRepository.findByToken(jwt)
-                .orElse(null);
+
+        Token storedToken;
+
+        try {
+            storedToken = tokenRepository.findByToken(jwt)
+                    .orElse(null);
+        } catch (PersistenceException e) {
+            log.error("Could not called findByToken on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return;
+        }
 
         if (storedToken != null) {
             log.info("Revoking and expiring the existing token for the user.");
             storedToken.setExpired(true);
             storedToken.setRevoked(true);
-            tokenRepository.save(storedToken);
+
+            try {
+                tokenRepository.save(storedToken);
+            } catch (PersistenceException e) {
+                log.error("Could not saved token on the database.");
+                log.error("Database is not reachable, {}", e.getMessage());
+                return;
+            }
+
             SecurityContextHolder.clearContext();
         }
     }
