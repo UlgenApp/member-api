@@ -70,10 +70,10 @@ public class RouteService {
 
         log.info("Fetched database and built: {}", routeDataDto.toString());
 
-        JsonNode response = routerClient.route(routeDataDto);
+        ResponseEntity<?> response = routerClient.route(routeDataDto);
 
         log.info("Got Response from Router Endpoint: {}", response.toString());
 
-        return ResponseEntity.ok(response);
+        return response;
     }
 }

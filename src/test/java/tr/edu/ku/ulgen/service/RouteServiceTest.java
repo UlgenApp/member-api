@@ -65,7 +65,7 @@ public class RouteServiceTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String routerResponseJson = "{\"result\": \"sample data\"}";
         JsonNode routerResponseJsonNode = objectMapper.readTree(routerResponseJson);
-        when(routerClient.route(any())).thenReturn(routerResponseJsonNode);
+        when(routerClient.route(any())).thenReturn(ResponseEntity.ok(routerResponseJsonNode));
 
         // When
         ResponseEntity<?> response = routeService.route(routeDto);
