@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tr.edu.ku.ulgen.dto.ProducerDto;
 import tr.edu.ku.ulgen.dto.RouteDto;
 import tr.edu.ku.ulgen.response.AffectedCitiesResponse;
 import tr.edu.ku.ulgen.service.AffectedDataService;
@@ -18,9 +17,9 @@ import tr.edu.ku.ulgen.service.UlgenConfigService;
 @AllArgsConstructor
 @Slf4j
 public class RouteController {
-    private RouteService routeService;
-    private AffectedDataService affectedDataService;
-    private UlgenConfigService ulgenConfigService;
+    private final RouteService routeService;
+    private final AffectedDataService affectedDataService;
+    private final UlgenConfigService ulgenConfigService;
 
     @PostMapping("/route")
     public ResponseEntity<?> route(@RequestBody RouteDto routeDto) {

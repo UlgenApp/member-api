@@ -16,7 +16,7 @@ import tr.edu.ku.ulgen.service.UserDataService;
 @Slf4j
 public class UserDataController {
 
-    private UserDataService userDataService;
+    private final UserDataService userDataService;
 
     @PostMapping("/update/additional-info")
     public ResponseEntity<?> updateAdditionalInfo(@RequestBody AdditionalInfoDto additionalInfoDto) {

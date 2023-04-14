@@ -18,13 +18,13 @@ import tr.edu.ku.ulgen.service.AuthenticationService;
 @Slf4j
 public class AuthenticationController {
 
-    private final AuthenticationService service;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
 
         log.info("Register request is received: {}", registerDto.getEmail());
-        AuthenticationResponse authenticationResponse = service.register(registerDto);
+        AuthenticationResponse authenticationResponse = authenticationService.register(registerDto);
 
         if (authenticationResponse == null) {
             log.error("Register failed for: {}", registerDto.getEmail());
@@ -39,6 +39,6 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationDto authenticationDto) {
 
         log.info("Login request is received: {}", authenticationDto.getEmail());
-        return ResponseEntity.ok(service.authenticate(authenticationDto));
+        return ResponseEntity.ok(authenticationService.authenticate(authenticationDto));
     }
 }

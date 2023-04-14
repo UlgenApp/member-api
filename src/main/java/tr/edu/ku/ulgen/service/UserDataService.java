@@ -15,7 +15,7 @@ import tr.edu.ku.ulgen.util.AuthenticatedUser;
 @Transactional
 @Slf4j
 public class UserDataService {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public Boolean updateAdditionalInfo(AdditionalInfoDto additionalInfoDto) {
         User authenticatedUser = new AuthenticatedUser(userRepository).getAuthenticatedUser();

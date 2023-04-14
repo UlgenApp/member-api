@@ -1,7 +1,6 @@
 package tr.edu.ku.ulgen.client.fallback;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

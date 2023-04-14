@@ -13,21 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 import tr.edu.ku.ulgen.client.ProducerClient;
 import tr.edu.ku.ulgen.dto.ProducerDataDto;
 import tr.edu.ku.ulgen.dto.ProducerDto;
-import tr.edu.ku.ulgen.repository.MACAddressRepository;
 import tr.edu.ku.ulgen.repository.UserRepository;
 import tr.edu.ku.ulgen.service.MACAddressService;
 import tr.edu.ku.ulgen.util.AuthenticatedUser;
-
-import java.net.UnknownHostException;
 
 @RestController
 @RequestMapping("/api/v1/producer")
 @AllArgsConstructor
 @Slf4j
 public class DataProducerController {
-    private ProducerClient producerClient;
-    private UserRepository userRepository;
-    private MACAddressService macAddressService;
+    private final ProducerClient producerClient;
+    private final UserRepository userRepository;
+    private final MACAddressService macAddressService;
 
     @PostMapping("/produce")
     public ResponseEntity<?> produce(@RequestBody ProducerDataDto producerDataDto) {

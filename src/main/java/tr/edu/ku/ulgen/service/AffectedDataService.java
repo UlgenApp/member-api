@@ -3,7 +3,6 @@ package tr.edu.ku.ulgen.service;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import tr.edu.ku.ulgen.entity.AffectedData;
 import tr.edu.ku.ulgen.repository.AffectedDataRepository;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AffectedDataService {
 
-    private AffectedDataRepository affectedDataRepository;
+    private final AffectedDataRepository affectedDataRepository;
 
     public List<String> getAffectedCities() {
         List<AffectedData> affectedDataList = new ArrayList<>();

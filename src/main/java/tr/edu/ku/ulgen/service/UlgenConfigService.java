@@ -14,7 +14,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class UlgenConfigService {
-    private UlgenConfigRepository configRepository;
+    private final UlgenConfigRepository configRepository;
 
     public Boolean isAlerted() {
         return getConfigPropertyValue("alerted");

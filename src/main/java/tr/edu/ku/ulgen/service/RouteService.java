@@ -18,10 +18,10 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class RouteService {
-    private RouterClient routerClient;
-    private UlgenDataRepository ulgenDataRepository;
-    private UlgenConfigService ulgenConfigService;
-    private AffectedDataService affectedDataService;
+    private final RouterClient routerClient;
+    private final UlgenDataRepository ulgenDataRepository;
+    private final UlgenConfigService ulgenConfigService;
+    private final AffectedDataService affectedDataService;
 
     public ResponseEntity<?> route(RouteDto routeDto) {
         Boolean isAlerted = ulgenConfigService.isAlerted();
