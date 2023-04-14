@@ -10,6 +10,8 @@ import java.util.List;
 @Builder
 public class RouteDataDto {
     private Double epsilon;
+    private Double priority_coefficient;
+    private Double distance_coefficient;
     private Integer vehicle_count;
     private Location depot;
     private List<Location> location;

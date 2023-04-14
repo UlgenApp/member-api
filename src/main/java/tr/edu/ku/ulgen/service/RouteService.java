@@ -1,6 +1,5 @@
 package tr.edu.ku.ulgen.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import tr.edu.ku.ulgen.dto.RouteDto;
 import tr.edu.ku.ulgen.repository.UlgenDataRepository;
 import tr.edu.ku.ulgen.util.Location;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,6 +32,20 @@ public class RouteService {
 
         if (!isAlerted) {
             return ResponseEntity.badRequest().build();
+        }
+
+        double tolerance = 1e-9;
+        double sum = routeDto.getPriority_coefficient() + routeDto.getDistance_coefficient();
+
+        if (Math.abs(sum - 1.0) > tolerance) {
+            log.error("Sum of priority and distance coefficients are not 1.");
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        if ((routeDto.getPriority_coefficient() <= 0.0 || routeDto.getPriority_coefficient() >= 1.0) ||
+                routeDto.getDistance_coefficient() <= 0.0 || routeDto.getDistance_coefficient() >= 1.0) {
+            log.error("Coefficients are not within the valid range (0 < x < 1).");
+            return ResponseEntity.unprocessableEntity().build();
         }
 
         List<String> affectedCities = affectedDataService.getAffectedCities();
@@ -63,6 +75,8 @@ public class RouteService {
 
         RouteDataDto routeDataDto = RouteDataDto.builder()
                 .epsilon(routeDto.getEpsilon())
+                .priority_coefficient(routeDto.getPriority_coefficient())
+                .distance_coefficient(routeDto.getDistance_coefficient())
                 .vehicle_count(routeDto.getVehicleCount())
                 .depot(routeDto.getDepot())
                 .location(affectedLocations)
