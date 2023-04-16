@@ -34,9 +34,9 @@ public class EmailSenderService {
      * @param subject the subject of the email
      * @param body    the body of the email
      *
-     * @throws MailParseException if the email cannot be parsed
-     * @throws MailAuthenticationException if the sender cannot be authenticated
-     * @throws MailSendException if the email cannot be sent
+     * @throws MailParseException if the email cannot be parsed.
+     * @throws MailAuthenticationException if the sender cannot be authenticated.
+     * @throws MailSendException if the email cannot be sent.
      */
     public void sendEmail(String to, String subject, String body) {
 
