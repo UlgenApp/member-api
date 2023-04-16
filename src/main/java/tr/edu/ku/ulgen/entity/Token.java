@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents the token entity in the database.
+ * Includes token information such as ID, token string, token type, revocation status, expiration status, and associated user.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @NoArgsConstructor

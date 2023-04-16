@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A service class responsible for managing affected cities and their data.
+ * It provides methods to get affected cities, and set the affected status of a list of cities.
+ *
+ * @author Kaan Turkmen
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -19,6 +25,11 @@ public class AffectedDataService {
 
     private final AffectedDataRepository affectedDataRepository;
 
+    /**
+     * Retrieves a list of affected cities.
+     *
+     * @return a list of affected city names.
+     */
     public List<String> getAffectedCities() {
         List<AffectedData> affectedDataList = new ArrayList<>();
 
@@ -29,12 +40,15 @@ public class AffectedDataService {
             log.error("Database is not reachable, {}", e.getMessage());
         }
 
-        return affectedDataList.stream()
-                .filter(AffectedData::getAffected)
-                .map(AffectedData::getCityName)
-                .collect(Collectors.toList());
+        return affectedDataList.stream().filter(AffectedData::getAffected).map(AffectedData::getCityName).collect(Collectors.toList());
     }
 
+    /**
+     * Sets the affected status for a list of city names.
+     *
+     * @param cityNames a list of city names for which the affected status should be set.
+     * @param value     the affected status value to set for the given city names.
+     */
     public void setAffectedCities(List<String> cityNames, Boolean value) {
         for (String cityName : cityNames) {
             Optional<AffectedData> affectedDataOptional = null;

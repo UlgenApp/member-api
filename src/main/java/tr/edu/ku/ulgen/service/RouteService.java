@@ -14,6 +14,13 @@ import tr.edu.ku.ulgen.util.Location;
 
 import java.util.List;
 
+/**
+ * A service class provides service-level operations related to routing processes.
+ * The main responsibility of this class is to interact with the RouterClient, UlgenDataRepository,
+ * UlgenConfigService, and AffectedDataService to handle routing requests and validations.
+ *
+ * @author Kaan Turkmen
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -23,6 +30,13 @@ public class RouteService {
     private final UlgenConfigService ulgenConfigService;
     private final AffectedDataService affectedDataService;
 
+    /**
+     * Handles the route request by validating input parameters, fetching affected locations,
+     * and sending the route data to the RouterClient.
+     *
+     * @param routeDto A RouteDto object containing routing information and parameters.
+     * @return A ResponseEntity containing the routing result or an error message.
+     */
     public ResponseEntity<?> route(RouteDto routeDto) {
         Boolean isAlerted = ulgenConfigService.isAlerted();
 
@@ -87,6 +101,11 @@ public class RouteService {
         ResponseEntity<?> response = routerClient.route(routeDataDto);
 
         log.info("Got Response from Router Endpoint: {}", response.toString());
+
+        if (response.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+            log.error("Bad request response received from RouterClient.");
+            return ResponseEntity.unprocessableEntity().build();
+        }
 
         return response;
     }

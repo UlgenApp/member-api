@@ -9,6 +9,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents the Ulgen configuration entity in the database.
+ * Includes the configuration property name and value.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @NoArgsConstructor

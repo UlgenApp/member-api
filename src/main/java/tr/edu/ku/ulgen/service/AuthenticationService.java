@@ -21,6 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * A service class responsible for managing user authentication and registration.
+ * It provides methods to register new users, authenticate existing users, and manage user tokens.
+ *
+ * @author Kaan Turkmen
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +37,12 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Registers a new user with the provided registration information.
+     *
+     * @param registerDto the registration data transfer object containing user registration information.
+     * @return an authentication response containing a JWT token, or null if registration fails.
+     */
     public AuthenticationResponse register(RegisterDto registerDto) {
         boolean mailExists;
 
@@ -47,14 +59,7 @@ public class AuthenticationService {
             return null;
         }
 
-        User user = User.builder()
-                .firstName(registerDto.getFirstName())
-                .lastName(registerDto.getLastName())
-                .email(registerDto.getEmail())
-                .password(passwordEncoder.encode(registerDto.getPassword()))
-                .role(Role.USER)
-                .additionalInfo(registerDto.getAdditionalInfo())
-                .build();
+        User user = User.builder().firstName(registerDto.getFirstName()).lastName(registerDto.getLastName()).email(registerDto.getEmail()).password(passwordEncoder.encode(registerDto.getPassword())).role(Role.USER).additionalInfo(registerDto.getAdditionalInfo()).build();
 
         log.info("Saving user to the database.");
 
@@ -83,24 +88,24 @@ public class AuthenticationService {
         log.info("Saving token to the database.");
         saveUserToken(savedUser, jwtToken);
 
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
+    /**
+     * Authenticates an existing user with the provided authentication information.
+     *
+     * @param authenticationDto the authentication data transfer object containing user authentication information.
+     * @return an authentication response containing a JWT token, or null if authentication fails.
+     */
     public AuthenticationResponse authenticate(AuthenticationDto authenticationDto) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationDto.getEmail(),
-                        authenticationDto.getPassword()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationDto.getEmail(), authenticationDto.getPassword()));
 
         log.info("Trying to find user with email.");
 
         User user;
 
         try {
-            user = this.userRepository.findByEmail(authenticationDto.getEmail())
-                    .orElseThrow();
+            user = this.userRepository.findByEmail(authenticationDto.getEmail()).orElseThrow();
         } catch (NoSuchElementException nse) {
             log.error("User with this email does not exist in the database.");
             return null;
@@ -119,19 +124,17 @@ public class AuthenticationService {
         log.info("Saving tokens to the database.");
         saveUserToken(user, jwtToken);
 
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
+    /**
+     * Saves a JWT token for the given user.
+     *
+     * @param user     the user entity for which the JWT token should be saved.
+     * @param jwtToken the JWT token to be saved.
+     */
     private void saveUserToken(User user, String jwtToken) {
-        Token token = Token.builder()
-                .user(user)
-                .token(jwtToken)
-                .tokenType(TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
-                .build();
+        Token token = Token.builder().user(user).token(jwtToken).tokenType(TokenType.BEARER).expired(false).revoked(false).build();
 
         try {
             tokenRepository.save(token);
@@ -141,6 +144,11 @@ public class AuthenticationService {
         }
     }
 
+    /**
+     * Revokes all valid JWT tokens for the given user.
+     *
+     * @param user the user entity for which all valid JWT tokens should be revoked.
+     */
     private void revokeAllUserTokens(User user) {
         List<Token> validUserTokens = new ArrayList<>();
 
@@ -151,8 +159,7 @@ public class AuthenticationService {
             log.error("Database is not reachable, {}", e.getMessage());
         }
 
-        if (validUserTokens.isEmpty())
-            return;
+        if (validUserTokens.isEmpty()) return;
         validUserTokens.forEach(token -> {
             token.setExpired(true);
             token.setRevoked(true);

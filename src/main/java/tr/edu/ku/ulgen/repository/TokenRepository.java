@@ -7,6 +7,12 @@ import tr.edu.ku.ulgen.entity.Token;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository interface for performing CRUD operations on the Token entity.
+ * Includes custom methods to find all valid tokens by user ID and find a token by its string representation.
+ *
+ * @author Kaan Turkmen
+ */
 public interface TokenRepository extends JpaRepository<Token, Integer> {
 
     @Query(value = """

@@ -12,6 +12,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Represents the Ulgen user entity in the database, implementing UserDetails for Spring Security.
+ * Includes user ID, first name, last name, email, password, role, and additional information.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @NoArgsConstructor

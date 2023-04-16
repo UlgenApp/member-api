@@ -6,6 +6,12 @@ import tr.edu.ku.ulgen.util.Location;
 
 import java.util.List;
 
+/**
+ * Data transfer object for route data.
+ * Represents the route parameters, including epsilon, priority and distance coefficients, vehicle count, depot, and locations.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 public class RouteDataDto {

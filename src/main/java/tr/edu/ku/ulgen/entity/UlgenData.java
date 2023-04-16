@@ -8,6 +8,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents the Ulgen data entity in the database.
+ * Includes user ID, number of active users, user location, and user city.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @NoArgsConstructor

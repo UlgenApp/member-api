@@ -12,6 +12,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+/**
+ * Spring Security configuration class for defining the security settings of the application.
+ * This class sets up the authentication and authorization rules for different API endpoints,
+ * configures the JWT authentication filter, and defines the logout behavior.
+ *
+ * @author Kaan Turkmen
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -21,6 +28,14 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
+    /**
+     * Configures the application's {@link SecurityFilterChain} with custom authentication and authorization settings,
+     * including JWT authentication filter and logout handling.
+     *
+     * @param http the {@link HttpSecurity} object to be used for configuring the application's security.
+     * @return the configured {@link SecurityFilterChain} instance.
+     * @throws Exception if an error occurs during the configuration process.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

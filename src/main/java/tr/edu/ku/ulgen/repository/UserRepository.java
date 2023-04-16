@@ -7,6 +7,12 @@ import tr.edu.ku.ulgen.entity.User;
 
 import java.util.Optional;
 
+/**
+ * Repository interface for performing CRUD operations on the User entity.
+ * Includes custom methods to check the existence of a user by email, find a user by email, and update additional information for a user by user ID.
+ *
+ * @author Kaan Turkmen
+ */
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     Boolean existsByEmail(String email);

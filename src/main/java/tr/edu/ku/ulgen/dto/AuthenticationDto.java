@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for user authentication.
+ * Represents the user's email and password for authentication purposes.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @AllArgsConstructor

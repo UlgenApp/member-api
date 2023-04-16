@@ -4,6 +4,12 @@ import lombok.Builder;
 import lombok.Data;
 import tr.edu.ku.ulgen.util.Location;
 
+/**
+ * Data transfer object for producer data.
+ * Represents the user ID, location, number of active users, and user city for data production.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 public class ProducerDto {

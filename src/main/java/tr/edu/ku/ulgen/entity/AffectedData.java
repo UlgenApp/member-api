@@ -9,6 +9,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents the affected cities data as an entity in the database.
+ * Includes the city name and whether it is affected or not.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @NoArgsConstructor

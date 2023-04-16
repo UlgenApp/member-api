@@ -5,7 +5,12 @@ import tr.edu.ku.ulgen.entity.UlgenData;
 
 import java.util.List;
 
-
+/**
+ * Repository interface for performing CRUD operations on the UlgenData entity.
+ * Includes a custom method to find all UlgenData with user cities in a given list.
+ *
+ * @author Kaan Turkmen
+ */
 public interface UlgenDataRepository extends JpaRepository<UlgenData, Integer> {
 
     List<UlgenData> findByUserCityIn(List<String> cities);

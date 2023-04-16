@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for user registration.
+ * Represents the user's first name, last name, email, password, and additional information.
+ *
+ * @author Kaan Turkmen
+ */
 @Data
 @Builder
 @AllArgsConstructor

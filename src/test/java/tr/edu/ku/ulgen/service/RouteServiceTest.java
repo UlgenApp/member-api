@@ -47,6 +47,8 @@ public class RouteServiceTest {
         RouteDto routeDto = RouteDto.builder()
                 .cities(Arrays.asList("City1", "City2"))
                 .epsilon(0.1)
+                .distance_coefficient(0.3)
+                .priority_coefficient(0.7)
                 .vehicleCount(2)
                 .depot(Location.builder().latitude(40.0).longitude(29.0).build())
                 .build();

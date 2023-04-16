@@ -12,6 +12,12 @@ import tr.edu.ku.ulgen.dto.RegisterDto;
 import tr.edu.ku.ulgen.response.AuthenticationResponse;
 import tr.edu.ku.ulgen.service.AuthenticationService;
 
+/**
+ * REST controller for handling user authentication and registration.
+ * This class exposes API endpoints for registering a new user and authenticating an existing user.
+ *
+ * @author Kaan Turkmen
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -20,6 +26,13 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+    /**
+     * Registers a new user with the provided registration details.
+     *
+     * @param registerDto the {@link RegisterDto} object containing the user's registration details.
+     * @return a {@link ResponseEntity} containing the {@link AuthenticationResponse} if registration is successful,
+     * or a bad request status if registration fails.
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
 
@@ -35,6 +48,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationResponse);
     }
 
+    /**
+     * Authenticates a user with the provided email and password.
+     *
+     * @param authenticationDto the {@link AuthenticationDto} object containing the user's email and password.
+     * @return a {@link ResponseEntity} containing the {@link AuthenticationResponse} with the authentication result.
+     */
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationDto authenticationDto) {
 

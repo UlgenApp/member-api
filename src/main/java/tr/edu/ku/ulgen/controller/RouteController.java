@@ -12,6 +12,12 @@ import tr.edu.ku.ulgen.service.AffectedDataService;
 import tr.edu.ku.ulgen.service.RouteService;
 import tr.edu.ku.ulgen.service.UlgenConfigService;
 
+/**
+ * REST controller for handling user route requests and fetching affected cities.
+ * This class exposes API endpoints for getting routing information and retrieving affected cities.
+ *
+ * @author Kaan Turkmen
+ */
 @RestController
 @RequestMapping("/api/v1/user")
 @AllArgsConstructor
@@ -21,6 +27,13 @@ public class RouteController {
     private final AffectedDataService affectedDataService;
     private final UlgenConfigService ulgenConfigService;
 
+    /**
+     * Retrieves the routing information based on the provided {@link RouteDto}.
+     * In case of a FeignException, returns a service unavailable status.
+     *
+     * @param routeDto the {@link RouteDto} object containing the route request details.
+     * @return a {@link ResponseEntity} containing the result of the routing operation.
+     */
     @PostMapping("/route")
     public ResponseEntity<?> route(@RequestBody RouteDto routeDto) {
 
@@ -32,6 +45,13 @@ public class RouteController {
         }
     }
 
+    /**
+     * Retrieves the affected cities if the system is in alerted state.
+     * If the system is not in alerted state, returns a bad request status.
+     *
+     * @return a {@link ResponseEntity} containing the {@link AffectedCitiesResponse} with the affected cities
+     * or a bad request status if the system is not in alerted state.
+     */
     @GetMapping("/affected-cities")
     public ResponseEntity<?> getAffectedCities() {
         Boolean isAlerted = ulgenConfigService.isAlerted();
@@ -41,9 +61,7 @@ public class RouteController {
         }
 
         if (isAlerted) {
-            return ResponseEntity.ok(AffectedCitiesResponse.builder()
-                    .affectedCities(affectedDataService.getAffectedCities())
-                    .build());
+            return ResponseEntity.ok(AffectedCitiesResponse.builder().affectedCities(affectedDataService.getAffectedCities()).build());
         }
 
         return ResponseEntity.badRequest().build();
