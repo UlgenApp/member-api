@@ -1,6 +1,6 @@
 package tr.edu.ku.ulgen.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailAuthenticationException;
@@ -16,13 +16,11 @@ import org.springframework.stereotype.Service;
  *
  * @author Kaan Turkmen
  */
-
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class EmailSenderService {
-
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     @Value("${ULGEN_EMAIL}")
     private String from;

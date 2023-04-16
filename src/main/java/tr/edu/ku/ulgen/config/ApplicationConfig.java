@@ -1,8 +1,11 @@
 package tr.edu.ku.ulgen.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -12,6 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tr.edu.ku.ulgen.repository.UserRepository;
+
+import java.util.Properties;
 
 /**
  * Configuration class for the application's beans and authentication.
@@ -24,6 +29,12 @@ import tr.edu.ku.ulgen.repository.UserRepository;
 @RequiredArgsConstructor
 public class ApplicationConfig {
     private final UserRepository userRepository;
+
+    @Value("${ULGEN_EMAIL}")
+    private String ulgenEmail;
+
+    @Value("${ULGEN_EMAIL_PASSWORD}")
+    private String ulgenEmailPassword;
 
     /**
      * Provides a custom {@link UserDetailsService} implementation that uses the {@link UserRepository}
@@ -72,4 +83,26 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Creates a new JavaMailSender instance with the necessary configurations.
+     * Sets the host, port, username, password, and other properties required for sending emails.
+     *
+     * @return a configured JavaMailSender instance for sending emails.
+     */
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
+
+        mailSender.setUsername(ulgenEmail);
+        mailSender.setPassword(ulgenEmailPassword);
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        return mailSender;
+    }
 }
