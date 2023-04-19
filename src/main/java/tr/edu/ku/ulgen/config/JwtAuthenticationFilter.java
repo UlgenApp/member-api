@@ -1,10 +1,12 @@
 package tr.edu.ku.ulgen.config;
 
+import jakarta.persistence.PersistenceException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,10 +15,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tr.edu.ku.ulgen.entity.Token;
 import tr.edu.ku.ulgen.repository.TokenRepository;
 import tr.edu.ku.ulgen.service.JwtService;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * A custom JWT authentication filter that processes and validates JWT tokens in the request's Authorization header.
@@ -28,6 +32,7 @@ import java.io.IOException;
  *
  * @author Kaan Turkmen
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -59,7 +64,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         userEmail = jwtService.extractUsername(jwt);
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            boolean isTokenValid = tokenRepository.findByToken(jwt).map(t -> !t.isExpired() && !t.isRevoked()).orElse(false);
+
+            Optional<Token> token;
+
+            try {
+                token = tokenRepository.findByToken(jwt);
+            } catch (PersistenceException e) {
+                log.error("Could not execute find by email on the database.");
+                log.error("Database is not reachable, {}", e.getMessage());
+
+                return;
+            }
+
+            boolean isTokenValid = token.map(t -> !t.isExpired() && !t.isRevoked()).orElse(false);
+
+
             boolean passwordResetToken = jwtService.hasClaim(jwt, "password_reset");
             boolean emailVerificationToken = jwtService.hasClaim(jwt, "email_verification");
 

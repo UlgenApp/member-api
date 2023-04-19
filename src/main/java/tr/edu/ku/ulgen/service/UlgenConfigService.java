@@ -1,7 +1,6 @@
 package tr.edu.ku.ulgen.service;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import tr.edu.ku.ulgen.entity.UlgenConfig;
 import tr.edu.ku.ulgen.repository.UlgenConfigRepository;
 import tr.edu.ku.ulgen.response.ConfigPropertyResponse;
-import tr.edu.ku.ulgen.response.VerifyEmailResponse;
 
 import java.util.Optional;
 
@@ -63,7 +61,6 @@ public class UlgenConfigService {
      *
      * @param configPropertyName The name of the configuration property to set.
      * @param value              The Boolean value to set for the configuration property.
-     *
      * @return a {@link ResponseEntity} containing a {@link ConfigPropertyResponse} with the result of the operation.
      */
     public ResponseEntity<ConfigPropertyResponse> setConfigPropertyValue(String configPropertyName, Boolean value) {

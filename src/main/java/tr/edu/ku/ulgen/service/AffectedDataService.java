@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import tr.edu.ku.ulgen.entity.AffectedData;
 import tr.edu.ku.ulgen.repository.AffectedDataRepository;
 import tr.edu.ku.ulgen.response.AffectedCitiesSetResponse;
-import tr.edu.ku.ulgen.response.ConfigPropertyResponse;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +52,6 @@ public class AffectedDataService {
      *
      * @param cityNames a list of city names for which the affected status should be set.
      * @param value     the affected status value to set for the given city names.
-     *
      * @return a {@link ResponseEntity} contains {@link AffectedCitiesSetResponse} with the result of the operation.
      */
     public ResponseEntity<AffectedCitiesSetResponse> setAffectedCities(List<String> cityNames, Boolean value) {

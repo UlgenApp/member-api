@@ -236,7 +236,7 @@ public class AuthenticationService {
     /**
      * Resets the password of a user using a provided token and a new password.
      *
-     * @param token      the token to be used for resetting the password.
+     * @param token       the token to be used for resetting the password.
      * @param newPassword the new password to be set for the user.
      * @return a {@link ResponseEntity} containing a {@link ResetPasswordResponse} with the result of the operation.
      */
@@ -252,7 +252,17 @@ public class AuthenticationService {
         }
 
         String email = jwtService.extractUsername(token);
-        Optional<User> user = userRepository.findByEmail(email);
+
+        Optional<User> user;
+
+        try {
+            user = userRepository.findByEmail(email);
+        } catch (PersistenceException e) {
+            log.error("Could not execute find by email on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ResetPasswordResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
 
         if (user.isEmpty()) {
             return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("USER_NOT_FOUND").build());
