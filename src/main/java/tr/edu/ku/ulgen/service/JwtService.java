@@ -5,8 +5,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -84,12 +86,24 @@ public class JwtService {
     }
 
     /**
+     * Checks if the provided token contains a specific claim.
+     *
+     * @param token     the JWT token to be checked for the presence of the claim.
+     * @param claimName the name of the claim to look for in the token.
+     * @return true if the token contains the specified claim, false otherwise.
+     */
+    public boolean hasClaim(String token, String claimName) {
+        Claims claims = extractAllClaims(token);
+        return claims.containsKey(claimName);
+    }
+
+    /**
      * Checks if the given JWT token has expired.
      *
      * @param token the JWT token.
      * @return true if the token has expired, false otherwise.
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 

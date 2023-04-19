@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tr.edu.ku.ulgen.dto.AffectedCitiesDto;
 import tr.edu.ku.ulgen.dto.AlertedDto;
+import tr.edu.ku.ulgen.response.AffectedCitiesSetResponse;
+import tr.edu.ku.ulgen.response.ConfigPropertyResponse;
 import tr.edu.ku.ulgen.service.AffectedDataService;
 import tr.edu.ku.ulgen.service.UlgenConfigService;
 
@@ -31,13 +33,11 @@ public class AdminOperationsController {
      * Updates the "alerted" configuration property with the provided value.
      *
      * @param alertedDto the {@link AlertedDto} object containing the updated "alerted" value.
-     * @return a {@link ResponseEntity} indicating the result of the operation.
+     * @return a {@link ResponseEntity} contains {@link ConfigPropertyResponse} with the result of the operation.
      */
     @PostMapping("/set-alerted")
-    public ResponseEntity<?> setAlertedValue(@RequestBody AlertedDto alertedDto) {
-        log.info("Set Alerted endpoint has been called: {}", alertedDto);
-        ulgenConfigService.setConfigPropertyValue("alerted", alertedDto.getAlerted());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ConfigPropertyResponse> setAlertedValue(@RequestBody AlertedDto alertedDto) {
+        return ulgenConfigService.setConfigPropertyValue("alerted", alertedDto.getAlerted());
     }
 
     /**
@@ -47,8 +47,7 @@ public class AdminOperationsController {
      * @return a {@link ResponseEntity} indicating the result of the operation.
      */
     @PostMapping("/set-affected-cities")
-    public ResponseEntity<?> setAffectedCities(@RequestBody AffectedCitiesDto affectedCitiesDto) {
-        affectedDataService.setAffectedCities(affectedCitiesDto.getCities(), affectedCitiesDto.getAffected());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AffectedCitiesSetResponse> setAffectedCities(@RequestBody AffectedCitiesDto affectedCitiesDto) {
+        return affectedDataService.setAffectedCities(affectedCitiesDto.getCities(), affectedCitiesDto.getAffected());
     }
 }

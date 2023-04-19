@@ -3,6 +3,8 @@ package tr.edu.ku.ulgen.service;
 import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,11 +17,9 @@ import tr.edu.ku.ulgen.entity.TokenType;
 import tr.edu.ku.ulgen.entity.User;
 import tr.edu.ku.ulgen.repository.TokenRepository;
 import tr.edu.ku.ulgen.repository.UserRepository;
-import tr.edu.ku.ulgen.response.AuthenticationResponse;
+import tr.edu.ku.ulgen.response.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A service class responsible for managing user authentication and registration.
@@ -36,14 +36,15 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailSenderService emailSenderService;
 
     /**
      * Registers a new user with the provided registration information.
      *
      * @param registerDto the registration data transfer object containing user registration information.
-     * @return an authentication response containing a JWT token, or null if registration fails.
+     * @return a {@link ResponseEntity} containing {@link RegisterResponse} with the result of the operation.
      */
-    public AuthenticationResponse register(RegisterDto registerDto) {
+    public ResponseEntity<RegisterResponse> register(RegisterDto registerDto) {
         boolean mailExists;
 
         try {
@@ -51,12 +52,12 @@ public class AuthenticationService {
         } catch (PersistenceException e) {
             log.error("Could not called existByEmail on the database.");
             log.error("Database is not reachable, {}", e.getMessage());
-            return null;
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RegisterResponse.builder().result("SERVICE_UNAVAILABLE").build());
         }
 
         if (mailExists) {
             log.error("Mail could not found in database for: {}", registerDto.getEmail());
-            return null;
+            return ResponseEntity.badRequest().body(RegisterResponse.builder().result("EMAIL_IS_TAKEN").build());
         }
 
         User user = User.builder().firstName(registerDto.getFirstName()).lastName(registerDto.getLastName()).email(registerDto.getEmail()).password(passwordEncoder.encode(registerDto.getPassword())).role(Role.USER).additionalInfo(registerDto.getAdditionalInfo()).build();
@@ -75,29 +76,23 @@ public class AuthenticationService {
 
         log.info("Generating token.");
 
-        String jwtToken;
-
-        try {
-            jwtToken = jwtService.generateToken(user);
-        } catch (PersistenceException e) {
-            log.error("Could not save user on the database.");
-            log.error("Database is not reachable, {}", e.getMessage());
-            return null;
-        }
+        String jwtToken = jwtService.generateToken(Map.of("email_verification", true), user);
 
         log.info("Saving token to the database.");
         saveUserToken(savedUser, jwtToken);
 
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        emailSenderService.sendEmail(savedUser.getEmail(), "About Your Ulgen Verification", "https://api.ulgen.app/verify-email?token=" + jwtToken);
+
+        return ResponseEntity.ok().body(RegisterResponse.builder().result("SUCCESS").build());
     }
 
     /**
      * Authenticates an existing user with the provided authentication information.
      *
      * @param authenticationDto the authentication data transfer object containing user authentication information.
-     * @return an authentication response containing a JWT token, or null if authentication fails.
+     * @return a {@link ResponseEntity} containing {@link AuthenticationResponse} with the result of the operation.
      */
-    public AuthenticationResponse authenticate(AuthenticationDto authenticationDto) {
+    public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationDto authenticationDto) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationDto.getEmail(), authenticationDto.getPassword()));
 
         log.info("Trying to find user with email.");
@@ -105,14 +100,14 @@ public class AuthenticationService {
         User user;
 
         try {
-            user = this.userRepository.findByEmail(authenticationDto.getEmail()).orElseThrow();
+            user = userRepository.findByEmail(authenticationDto.getEmail()).orElseThrow();
         } catch (NoSuchElementException nse) {
             log.error("User with this email does not exist in the database.");
-            return null;
+            return ResponseEntity.badRequest().body(AuthenticationResponse.builder().result("USER_NOT_FOUND").build());
         } catch (PersistenceException e) {
             log.error("Could not called findByEmail on the database.");
             log.error("Database is not reachable, {}", e.getMessage());
-            return null;
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(AuthenticationResponse.builder().result("SERVICE_UNAVAILABLE").build());
         }
 
         log.info("Generating token.");
@@ -124,7 +119,159 @@ public class AuthenticationService {
         log.info("Saving tokens to the database.");
         saveUserToken(user, jwtToken);
 
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return ResponseEntity.ok().body(AuthenticationResponse.builder().result("SUCCESS").token(jwtToken).build());
+    }
+
+    /**
+     * Verifies the email of a user using a provided JWT token.
+     *
+     * @param token the JWT token to be used for email verification.
+     * @return a {@link ResponseEntity} containing a {@link VerifyEmailResponse} with the result of the operation.
+     */
+    public ResponseEntity<VerifyEmailResponse> verifyEmail(String token) {
+        boolean emailVerification = jwtService.hasClaim(token, "email_verification");
+
+        if (!emailVerification) {
+            return ResponseEntity.badRequest().body(VerifyEmailResponse.builder().result("BAD_TOKEN").build());
+        }
+
+        String email = jwtService.extractUsername(token);
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(VerifyEmailResponse.builder().result("USER_NOT_FOUND").build());
+        }
+
+        if (jwtService.isTokenExpired(token)) {
+            return ResponseEntity.badRequest().body(VerifyEmailResponse.builder().result("TOKEN_EXPIRED").build());
+        }
+
+        User currentUser = user.get();
+        currentUser.setEnabled(true);
+
+        try {
+            userRepository.save(currentUser);
+        } catch (PersistenceException e) {
+            log.error("Could not update user's enabled property on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(VerifyEmailResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
+
+        revokeAllUserTokens(currentUser);
+
+        return ResponseEntity.ok().body(VerifyEmailResponse.builder().result("SUCCESS").build());
+    }
+
+    /**
+     * Resends the email verification link to the user with the provided email.
+     *
+     * @param email the email address of the user to resend the email verification link to.
+     * @return a {@link ResponseEntity} containing a {@link VerifyEmailResponse} with the result of the operation.
+     */
+    public ResponseEntity<VerifyEmailResponse> resendEmailVerification(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(VerifyEmailResponse.builder().result("USER_NOT_FOUND").build());
+        }
+
+        User currentUser = user.get();
+
+        if (currentUser.isEnabled()) {
+            return ResponseEntity.badRequest().body(VerifyEmailResponse.builder().result("USER_ALREADY_VERIFIED").build());
+        }
+
+        revokeAllUserTokens(currentUser);
+
+        String jwtToken = jwtService.generateToken(Map.of("email_verification", true), currentUser);
+
+        Token token = Token.builder().user(currentUser).token(jwtToken).build();
+
+        try {
+            tokenRepository.save(token);
+        } catch (PersistenceException e) {
+            log.error("Could not save token on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(VerifyEmailResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
+
+        emailSenderService.sendEmail(currentUser.getEmail(), "About Your Ulgen Verification", "localhost:8080/verify-email?token=" + jwtToken);
+
+        return ResponseEntity.ok().body(VerifyEmailResponse.builder().result("SUCCESS").build());
+    }
+
+    /**
+     * Generates a password reset link for the user with the provided email and sends it via email.
+     *
+     * @param email the email address of the user who wants to reset their password.
+     * @return a {@link ResponseEntity} containing a {@link ForgotPasswordResponse} with the result of the operation.
+     */
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(ForgotPasswordResponse.builder().result("USER_NOT_FOUND").build());
+        }
+
+        User u = user.get();
+
+        revokeAllUserTokens(u);
+
+        String token = jwtService.generateToken(Map.of("password_reset", true), u);
+        Token t = Token.builder().token(token).tokenType(TokenType.BEARER).expired(false).revoked(false).user(u).build();
+
+        try {
+            tokenRepository.save(t);
+        } catch (PersistenceException e) {
+            log.error("Could not save password reset token on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ForgotPasswordResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
+
+        emailSenderService.sendEmail(u.getEmail(), "About Ulgen Password Reset", "https://api.ulgen.app");
+
+        return ResponseEntity.ok().body(ForgotPasswordResponse.builder().result("SUCCESS").build());
+    }
+
+    /**
+     * Resets the password of a user using a provided token and a new password.
+     *
+     * @param token      the token to be used for resetting the password.
+     * @param newPassword the new password to be set for the user.
+     * @return a {@link ResponseEntity} containing a {@link ResetPasswordResponse} with the result of the operation.
+     */
+    public ResponseEntity<ResetPasswordResponse> resetPassword(String token, String newPassword) {
+        boolean passwordReset = jwtService.hasClaim(token, "password_reset");
+
+        if (!passwordReset) {
+            return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("BAD_TOKEN").build());
+        }
+
+        if (jwtService.isTokenExpired(token)) {
+            return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("TOKEN_EXPIRED").build());
+        }
+
+        String email = jwtService.extractUsername(token);
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("USER_NOT_FOUND").build());
+        }
+
+        User currentUser = user.get();
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
+
+        try {
+            userRepository.save(currentUser);
+        } catch (PersistenceException e) {
+            log.error("Could not update user's enabled property on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ResetPasswordResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
+
+        revokeAllUserTokens(currentUser);
+
+        return ResponseEntity.ok().body(ResetPasswordResponse.builder().result("SUCCESS").build());
     }
 
     /**

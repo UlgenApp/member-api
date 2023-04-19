@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Represents the Ulgen user entity in the database, implementing UserDetails for Spring Security.
- * Includes user ID, first name, last name, email, password, role, and additional information.
+ * Includes user ID, first name, last name, email, password, role, additional information, and is enabled property.
  *
  * @author Kaan Turkmen
  */
@@ -40,6 +40,8 @@ public class User implements UserDetails {
     private Role role;
 
     private String additionalInfo;
+
+    private boolean isEnabled;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -68,6 +70,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
     }
 }

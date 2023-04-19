@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * A class that represents the response object containing the authentication token.
+ * A response object representing the result of an authentication request.
  *
  * @author Kaan Turkmen
  */
@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponse {
-
+    private String result;
     private String token;
 }

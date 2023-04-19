@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tr.edu.ku.ulgen.dto.AuthenticationDto;
 import tr.edu.ku.ulgen.dto.RegisterDto;
 import tr.edu.ku.ulgen.response.AuthenticationResponse;
+import tr.edu.ku.ulgen.response.RegisterResponse;
 import tr.edu.ku.ulgen.service.AuthenticationService;
 
 /**
@@ -30,22 +31,12 @@ public class AuthenticationController {
      * Registers a new user with the provided registration details.
      *
      * @param registerDto the {@link RegisterDto} object containing the user's registration details.
-     * @return a {@link ResponseEntity} containing the {@link AuthenticationResponse} if registration is successful,
+     * @return a {@link ResponseEntity} containing the {@link RegisterResponse} if registration is successful,
      * or a bad request status if registration fails.
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
-
-        log.info("Register request is received: {}", registerDto.getEmail());
-        AuthenticationResponse authenticationResponse = authenticationService.register(registerDto);
-
-        if (authenticationResponse == null) {
-            log.error("Register failed for: {}", registerDto.getEmail());
-            return ResponseEntity.badRequest().build();
-        }
-
-        log.info("Register successful for: {}", registerDto.getEmail());
-        return ResponseEntity.ok(authenticationResponse);
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterDto registerDto) {
+        return authenticationService.register(registerDto);
     }
 
     /**
@@ -56,8 +47,6 @@ public class AuthenticationController {
      */
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationDto authenticationDto) {
-
-        log.info("Login request is received: {}", authenticationDto.getEmail());
-        return ResponseEntity.ok(authenticationService.authenticate(authenticationDto));
+        return authenticationService.authenticate(authenticationDto);
     }
 }

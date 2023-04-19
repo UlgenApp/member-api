@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tr.edu.ku.ulgen.dto.AuthenticationDto;
@@ -14,8 +16,9 @@ import tr.edu.ku.ulgen.entity.Role;
 import tr.edu.ku.ulgen.entity.User;
 import tr.edu.ku.ulgen.repository.TokenRepository;
 import tr.edu.ku.ulgen.repository.UserRepository;
-import tr.edu.ku.ulgen.response.AuthenticationResponse;
+import tr.edu.ku.ulgen.response.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,80 +38,130 @@ public class AuthenticationServiceTest {
     private TokenRepository tokenRepository;
 
     @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
     private JwtService jwtService;
 
     @Mock
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private EmailSenderService emailSenderService;
 
     private RegisterDto registerDto;
-    private AuthenticationDto authenticationDto;
+    private User user;
 
     @BeforeEach
-    public void setUp() {
-        registerDto = new RegisterDto("John", "Doe", "john.doe@example.com", "testpassword", "Hello from Ulgen!");
-        authenticationDto = new AuthenticationDto("john.doe@example.com", "testpassword");
-    }
-
-    @Test
-    public void shouldRegisterSuccessful() {
-        // Given
-        when(userRepository.existsByEmail(registerDto.getEmail())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(jwtService.generateToken(any(User.class))).thenReturn("sample_jwt_token");
-
-        // When
-        AuthenticationResponse response = authenticationService.register(registerDto);
-
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.getToken()).isEqualTo("sample_jwt_token");
-
-        verify(userRepository).save(any(User.class));
-        verify(tokenRepository).save(any());
-    }
-
-    @Test
-    public void shouldAuthenticateUser() {
-        // Given
-        User testUser = User.builder()
+    void setUp() {
+        registerDto = RegisterDto.builder()
+                .email("test@example.com")
+                .password("password")
                 .firstName("John")
                 .lastName("Doe")
-                .email("john.doe@example.com")
-                .password("testpassword")
-                .role(Role.USER)
-                .additionalInfo("Hello from Ulgen!")
                 .build();
 
-        when(userRepository.findByEmail(authenticationDto.getEmail())).thenReturn(Optional.of(testUser));
-        when(jwtService.generateToken(testUser)).thenReturn("sample_jwt_token");
-
-        // When
-        AuthenticationResponse response = authenticationService.authenticate(authenticationDto);
-
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.getToken()).isEqualTo("sample_jwt_token");
-
-        verify(tokenRepository).save(any());
-        verify(tokenRepository).findAllValidTokenByUser(testUser.getId());
+        user = User.builder()
+                .email(registerDto.getEmail())
+                .password(registerDto.getPassword())
+                .firstName(registerDto.getFirstName())
+                .lastName(registerDto.getLastName())
+                .role(Role.USER)
+                .build();
     }
 
     @Test
-    public void shouldReturnNullBecauseOfTakenEmail() {
+    void shouldRegister() {
+        // Given
+        when(userRepository.existsByEmail(registerDto.getEmail())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(jwtService.generateToken(any(Map.class), any(User.class))).thenReturn("test_jwt_token");
+
+        // When
+        ResponseEntity<RegisterResponse> response = authenticationService.register(registerDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
+        verify(emailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void shouldGiveEmailIsTaken() {
         // Given
         when(userRepository.existsByEmail(registerDto.getEmail())).thenReturn(true);
 
         // When
-        AuthenticationResponse response = authenticationService.register(registerDto);
+        ResponseEntity<RegisterResponse> response = authenticationService.register(registerDto);
 
         // Then
-        assertThat(response).isNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().getResult()).isEqualTo("EMAIL_IS_TAKEN");
+    }
 
-        verify(userRepository, never()).save(any(User.class));
-        verify(tokenRepository, never()).save(any());
+    @Test
+    public void shouldAuthenticate() {
+        // Given
+        AuthenticationDto authenticationDto = new AuthenticationDto("test@example.com", "test_password");
+        User user = new User(1L, "John", "Doe", "test@example.com", passwordEncoder.encode("test_password"), Role.USER, null, true);
+        when(userRepository.findByEmail(authenticationDto.getEmail())).thenReturn(Optional.of(user));
+
+        // When
+        ResponseEntity<AuthenticationResponse> response = authenticationService.authenticate(authenticationDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
+    }
+
+
+    @Test
+    public void shouldTestResendEmailVerification() {
+        // Given
+        String email = "test@example.com";
+        User user = new User(1L, "John", "Doe", email, "hashed_password", Role.USER, null, false);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        // When
+        ResponseEntity<VerifyEmailResponse> response = authenticationService.resendEmailVerification(email);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
+    }
+
+    @Test
+    public void shouldTestForgotPassword() {
+        // Given
+        String email = "test@example.com";
+        User user = new User(1L, "John", "Doe", email, "hashed_password", Role.USER, null, true);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        // When
+        ResponseEntity<ForgotPasswordResponse> response = authenticationService.forgotPassword(email);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
+    }
+
+    @Test
+    public void shouldTestResetPassword() {
+        // Given
+        String token = "valid_password_reset_token";
+        String newPassword = "new_test_password";
+        String email = "test@example.com";
+        User user = new User(1L, "John", "Doe", email, "hashed_password", Role.USER, null, true);
+        when(jwtService.hasClaim(token, "password_reset")).thenReturn(true);
+        when(jwtService.extractUsername(token)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        // When
+        ResponseEntity<ResetPasswordResponse> response = authenticationService.resetPassword(token, newPassword);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
     }
 
 }

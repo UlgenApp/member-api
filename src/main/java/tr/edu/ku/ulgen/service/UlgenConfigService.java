@@ -1,12 +1,17 @@
 package tr.edu.ku.ulgen.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tr.edu.ku.ulgen.entity.UlgenConfig;
 import tr.edu.ku.ulgen.repository.UlgenConfigRepository;
+import tr.edu.ku.ulgen.response.ConfigPropertyResponse;
+import tr.edu.ku.ulgen.response.VerifyEmailResponse;
 
 import java.util.Optional;
 
@@ -58,8 +63,10 @@ public class UlgenConfigService {
      *
      * @param configPropertyName The name of the configuration property to set.
      * @param value              The Boolean value to set for the configuration property.
+     *
+     * @return a {@link ResponseEntity} containing a {@link ConfigPropertyResponse} with the result of the operation.
      */
-    public void setConfigPropertyValue(String configPropertyName, Boolean value) {
+    public ResponseEntity<ConfigPropertyResponse> setConfigPropertyValue(String configPropertyName, Boolean value) {
         Optional<UlgenConfig> configOptional;
 
         try {
@@ -67,7 +74,7 @@ public class UlgenConfigService {
         } catch (PersistenceException e) {
             log.error("Could not called findById on the database.");
             log.error("Database is not reachable, {}", e.getMessage());
-            return;
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ConfigPropertyResponse.builder().result("SERVICE_UNAVAILABLE").build());
         }
 
 
@@ -81,6 +88,7 @@ public class UlgenConfigService {
             } catch (PersistenceException e) {
                 log.error("Could not saved config to the database.");
                 log.error("Database is not reachable, {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ConfigPropertyResponse.builder().result("SERVICE_UNAVAILABLE").build());
             }
         } else {
             log.info("Config is not found, creating.");
@@ -94,7 +102,10 @@ public class UlgenConfigService {
             } catch (PersistenceException e) {
                 log.error("Could not saved config to the database.");
                 log.error("Database is not reachable, {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ConfigPropertyResponse.builder().result("SERVICE_UNAVAILABLE").build());
             }
         }
+
+        return ResponseEntity.ok().body(ConfigPropertyResponse.builder().result("SUCCESS").build());
     }
 }

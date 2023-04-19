@@ -40,7 +40,7 @@ public class RouteController {
         try {
             return ResponseEntity.ok(routeService.route(routeDto));
         } catch (FeignException e) {
-            log.error("FeignException occured, routing-api is down: {}", e.getMessage());
+            log.error("FeignException occurred, routing-api is down: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is currently unavailable");
         }
     }

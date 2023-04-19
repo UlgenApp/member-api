@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * A class that represents the response object containing a list of affected cities.
+ * A response object representing the response object containing a list of affected cities.
  *
  * @author Kaan Turkmen
  */
