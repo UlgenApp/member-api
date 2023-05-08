@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tr.edu.ku.ulgen.client.RouterClient;
+import tr.edu.ku.ulgen.dto.HeatmapDataDto;
+import tr.edu.ku.ulgen.dto.HeatmapDto;
 import tr.edu.ku.ulgen.dto.RouteDataDto;
 import tr.edu.ku.ulgen.dto.RouteDto;
 import tr.edu.ku.ulgen.repository.UlgenDataRepository;
@@ -99,6 +101,70 @@ public class RouteService {
         log.info("Fetched database and built: {}", routeDataDto.toString());
 
         ResponseEntity<?> response = routerClient.route(routeDataDto);
+
+        log.info("Got Response from Router Endpoint: {}", response.toString());
+
+        if (response.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+            log.error("Bad request response received from RouterClient.");
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        return response;
+    }
+
+    /**
+     * Handles the heatmap request by  fetching affected locations,
+     * and sending the route data to the RouterClient.
+     *
+     * @param heatmapDto A RouteDto object containing routing information and parameters.
+     * @return A ResponseEntity containing the routing result or an error message.
+     */
+    public ResponseEntity<?> heatmap(HeatmapDto heatmapDto) {
+        Boolean isAlerted = ulgenConfigService.isAlerted();
+
+        if (isAlerted == null) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is currently unavailable");
+        }
+
+        if (!isAlerted) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        double tolerance = 1e-9;
+
+        List<String> affectedCities = affectedDataService.getAffectedCities();
+        List<String> cities = heatmapDto.getCities();
+
+        log.info("Affected cities, {}", affectedCities);
+        log.info("Cities, {}", cities);
+
+        if (cities.stream().anyMatch(city -> !affectedCities.contains(city))) {
+            return ResponseEntity.unprocessableEntity().build();
+        }
+
+        List<Location> affectedLocations;
+
+        try {
+            affectedLocations = ulgenDataRepository.findByUserCityIn(cities)
+                    .stream()
+                    .map(ulgenData -> Location.builder()
+                            .latitude(ulgenData.getLatitude())
+                            .longitude(ulgenData.getLongitude()).build())
+                    .toList();
+        } catch (PersistenceException e) {
+            log.error("Could not called findByUserCityIn on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is currently unavailable");
+        }
+
+        HeatmapDataDto heatmapDataDto = HeatmapDataDto.builder()
+                .epsilon(heatmapDto.getEpsilon())
+                .location(affectedLocations)
+                .build();
+
+        log.info("Fetched database and built: {}", heatmapDataDto.toString());
+
+        ResponseEntity<?> response = routerClient.heatmap(heatmapDataDto);
 
         log.info("Got Response from Router Endpoint: {}", response.toString());
 

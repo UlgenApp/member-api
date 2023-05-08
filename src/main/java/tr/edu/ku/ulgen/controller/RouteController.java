@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tr.edu.ku.ulgen.dto.HeatmapDto;
 import tr.edu.ku.ulgen.dto.RouteDto;
 import tr.edu.ku.ulgen.response.AffectedCitiesResponse;
 import tr.edu.ku.ulgen.service.AffectedDataService;
@@ -39,6 +40,24 @@ public class RouteController {
 
         try {
             return ResponseEntity.ok(routeService.route(routeDto));
+        } catch (FeignException e) {
+            log.error("FeignException occurred, routing-api is down: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is currently unavailable");
+        }
+    }
+
+    /**
+     * Retrieves the routing information based on the provided {@link HeatmapDto}.
+     * In case of a FeignException, returns a service unavailable status.
+     *
+     * @param heatmapDto the {@link HeatmapDto} object containing the route request details.
+     * @return a {@link ResponseEntity} containing the result of the heatmap operation.
+     */
+    @PostMapping("/heatmap")
+    public ResponseEntity<?> route(@RequestBody HeatmapDto heatmapDto) {
+
+        try {
+            return ResponseEntity.ok(routeService.heatmap(heatmapDto));
         } catch (FeignException e) {
             log.error("FeignException occurred, routing-api is down: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Service is currently unavailable");
