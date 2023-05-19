@@ -1,6 +1,7 @@
 package tr.edu.ku.ulgen.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ public interface RouterClient {
      * @return a {@link ResponseEntity} containing a {@link JsonNode} with the processed route data.
      */
     @PostMapping("/api/v1/route")
+    @Cacheable(value = "routeCache", key = "#routeDataDto.hashCode()", unless = "#result == null")
     ResponseEntity<JsonNode> route(@RequestBody RouteDataDto routeDataDto);
 
     /**
@@ -35,5 +37,6 @@ public interface RouterClient {
      * @return a {@link ResponseEntity} containing a {@link JsonNode} with the processed route data.
      */
     @PostMapping("/api/v1/heatmap")
+    @Cacheable(value = "heatmapCache", key = "#heatmapDataDto.hashCode()", unless = "#result == null")
     ResponseEntity<JsonNode> heatmap(@RequestBody HeatmapDataDto heatmapDataDto);
 }
