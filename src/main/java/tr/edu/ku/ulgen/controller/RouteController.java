@@ -54,7 +54,7 @@ public class RouteController {
      * @return a {@link ResponseEntity} containing the result of the heatmap operation.
      */
     @PostMapping("/heatmap")
-    public ResponseEntity<?> route(@RequestBody HeatmapDto heatmapDto) {
+    public ResponseEntity<?> heatmap(@RequestBody HeatmapDto heatmapDto) {
 
         try {
             return ResponseEntity.ok(routeService.heatmap(heatmapDto));

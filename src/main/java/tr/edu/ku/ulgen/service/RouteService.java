@@ -58,8 +58,8 @@ public class RouteService {
             return ResponseEntity.unprocessableEntity().build();
         }
 
-        if ((routeDto.getPriority_coefficient() <= 0.0 || routeDto.getPriority_coefficient() >= 1.0) ||
-                routeDto.getDistance_coefficient() <= 0.0 || routeDto.getDistance_coefficient() >= 1.0) {
+        if ((routeDto.getPriority_coefficient() < 0.0 || routeDto.getPriority_coefficient() > 1.0) ||
+                routeDto.getDistance_coefficient() < 0.0 || routeDto.getDistance_coefficient() > 1.0) {
             log.error("Coefficients are not within the valid range (0 < x < 1).");
             return ResponseEntity.unprocessableEntity().build();
         }
