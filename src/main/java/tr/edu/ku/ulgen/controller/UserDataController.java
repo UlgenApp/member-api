@@ -45,4 +45,15 @@ public class UserDataController {
         Boolean isUpdated = userDataService.updateAdditionalInfo(additionalInfoDto);
         return isUpdated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
     }
+
+    /**
+     * Marks user safe and removes it from the data table.
+     *
+     * @return a {@link ResponseEntity} containing the status of the update operation.
+     */
+    @PostMapping("/safe")
+    public ResponseEntity<?> safe() {
+        log.info("Safe request is received.");
+        return userDataService.safe();
+    }
 }

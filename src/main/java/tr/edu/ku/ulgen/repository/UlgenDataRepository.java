@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import tr.edu.ku.ulgen.entity.UlgenData;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for performing CRUD operations on the UlgenData entity.
@@ -14,4 +15,8 @@ import java.util.List;
 public interface UlgenDataRepository extends JpaRepository<UlgenData, Integer> {
 
     List<UlgenData> findByUserCityIn(List<String> cities);
+
+    Optional<UlgenData> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }
