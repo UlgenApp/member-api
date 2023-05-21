@@ -130,22 +130,14 @@ public class RouteService {
             return ResponseEntity.badRequest().build();
         }
 
-        double tolerance = 1e-9;
-
         List<String> affectedCities = affectedDataService.getAffectedCities();
-        List<String> cities = heatmapDto.getCities();
 
         log.info("Affected cities, {}", affectedCities);
-        log.info("Cities, {}", cities);
-
-        if (cities.stream().anyMatch(city -> !affectedCities.contains(city))) {
-            return ResponseEntity.unprocessableEntity().build();
-        }
 
         List<Location> affectedLocations;
 
         try {
-            affectedLocations = ulgenDataRepository.findByUserCityIn(cities)
+            affectedLocations = ulgenDataRepository.findByUserCityIn(affectedCities)
                     .stream()
                     .map(ulgenData -> Location.builder()
                             .latitude(ulgenData.getLatitude())

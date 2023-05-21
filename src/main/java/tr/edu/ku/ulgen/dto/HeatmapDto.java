@@ -12,8 +12,6 @@ import java.util.List;
  * @author Kaan Turkmen
  */
 @Data
-@Builder
 public class HeatmapDto {
     private Double epsilon;
-    private List<String> cities;
 }
