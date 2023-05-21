@@ -32,6 +32,7 @@ public class UserDataService {
     private final UserRepository userRepository;
     private final UlgenDataRepository ulgenDataRepository;
     private final AffectedDataService affectedDataService;
+    private final UlgenConfigService ulgenConfigService;
 
     /**
      * Updates the additional information of the authenticated user.
@@ -100,6 +101,11 @@ public class UserDataService {
 
         if (ulgenDataOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(UserResponse.builder().build());
+        }
+
+        if (!ulgenConfigService.isAlerted()) {
+            log.error("There is not any reported danger yet.");
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("There is not any reported danger yet.");
         }
 
         UlgenData ulgenData = ulgenDataOptional.get();
