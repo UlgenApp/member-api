@@ -1,9 +1,6 @@
 package tr.edu.ku.ulgen.dto;
 
-import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * Data transfer object for heatmap information.

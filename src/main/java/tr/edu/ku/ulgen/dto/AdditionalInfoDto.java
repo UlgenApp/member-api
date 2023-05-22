@@ -1,6 +1,5 @@
 package tr.edu.ku.ulgen.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**

@@ -16,7 +16,10 @@ import tr.edu.ku.ulgen.entity.Role;
 import tr.edu.ku.ulgen.entity.User;
 import tr.edu.ku.ulgen.repository.TokenRepository;
 import tr.edu.ku.ulgen.repository.UserRepository;
-import tr.edu.ku.ulgen.response.*;
+import tr.edu.ku.ulgen.response.AuthenticationResponse;
+import tr.edu.ku.ulgen.response.ForgotPasswordResponse;
+import tr.edu.ku.ulgen.response.RegisterResponse;
+import tr.edu.ku.ulgen.response.VerifyEmailResponse;
 
 import java.util.Map;
 import java.util.Optional;
