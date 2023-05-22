@@ -81,7 +81,13 @@ public class AuthenticationService {
         log.info("Saving token to the database.");
         saveUserToken(savedUser, jwtToken);
 
-        emailSenderService.sendEmail(savedUser.getEmail(), "About Your Ulgen Verification", "https://api.ulgen.app/verify-email?token=" + jwtToken);
+        String emailBody = "Merhaba Ülgenli,\n\n" +
+                "Uygulamamızı kullanabilmen için sadece bir adım kaldı. Uygulamamızın güvenliğini sağlaman için e-mail adresini doğrulaman gerekiyor. Bunun için aşağıdaki bağlantıya tıklaman yeterli, şimdiden iyi eğlenceler!\n\n" +
+                "https://ulgen.app/verify-email?token=" + jwtToken + "\n\n" +
+                "Kendine iyi bak,\n" +
+                "Ülgen.";
+
+        emailSenderService.sendEmail(savedUser.getEmail(), "Ülgen Hesabını Onayla", emailBody);
 
         return ResponseEntity.ok().body(RegisterResponse.builder().result("SUCCESS").build());
     }
@@ -195,7 +201,13 @@ public class AuthenticationService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(VerifyEmailResponse.builder().result("SERVICE_UNAVAILABLE").build());
         }
 
-        emailSenderService.sendEmail(currentUser.getEmail(), "About Your Ulgen Verification", "localhost:8080/verify-email?token=" + jwtToken);
+        String emailBody = "Merhaba Ülgenli,\n\n" +
+                "Uygulamamızı kullanabilmen için sadece bir adım kaldı. Uygulamamızın güvenliğini sağlaman için e-mail adresini doğrulaman gerekiyor. Bunun için aşağıdaki bağlantıya tıklaman yeterli, şimdiden iyi eğlenceler!\n\n" +
+                "https://ulgen.app/verify-email?token=" + jwtToken + "\n\n" +
+                "Kendine iyi bak,\n" +
+                "Ülgen.";
+
+        emailSenderService.sendEmail(currentUser.getEmail(), "Ülgen Hesabını Onayla", emailBody);
 
         return ResponseEntity.ok().body(VerifyEmailResponse.builder().result("SUCCESS").build());
     }
@@ -228,7 +240,13 @@ public class AuthenticationService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ForgotPasswordResponse.builder().result("SERVICE_UNAVAILABLE").build());
         }
 
-        emailSenderService.sendEmail(u.getEmail(), "About Ulgen Password Reset", "https://api.ulgen.app");
+        String emailBody = "Merhaba Ülgenli,\n\n" +
+                "Bizden kısa bir süre önce bir şifre sıfırlama isteğinde bulundun. Aşağıdaki bağlantıda yer alan adımları takip ederek bunu gerçekleştirebilirsin. Eğer ki bu istekte bulunan kişi sen değilsen şifreni değiştirmeni tavsiye ediyoruz.\n\n" +
+                "https://ulgen.app/reset-password?token=" + token + "\n\n" +
+                "Kendine iyi bak,\n" +
+                "Ülgen.";
+
+        emailSenderService.sendEmail(u.getEmail(), "Ülgen Şifre Sıfırlama Bağlantın", emailBody);
 
         return ResponseEntity.ok().body(ForgotPasswordResponse.builder().result("SUCCESS").build());
     }
@@ -242,6 +260,24 @@ public class AuthenticationService {
      */
     public ResponseEntity<ResetPasswordResponse> resetPassword(String token, String newPassword) {
         boolean passwordReset = jwtService.hasClaim(token, "password_reset");
+        Optional<Token> t;
+
+        try {
+            t = tokenRepository.findByToken(token);
+        } catch (PersistenceException e) {
+            log.error("Could not execute find by token on the database.");
+            log.error("Database is not reachable, {}", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ResetPasswordResponse.builder().result("SERVICE_UNAVAILABLE").build());
+        }
+
+        if (t.isEmpty()) {
+            return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("BAD_TOKEN").build());
+        }
+
+        if (t.get().isRevoked()) {
+            return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("USED_TOKEN").build());
+        }
 
         if (!passwordReset) {
             return ResponseEntity.badRequest().body(ResetPasswordResponse.builder().result("BAD_TOKEN").build());
