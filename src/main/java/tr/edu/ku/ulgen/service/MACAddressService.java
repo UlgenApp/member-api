@@ -39,6 +39,10 @@ public class MACAddressService {
             return -1;
         }
 
+        if (matchingAddresses.size() == 0) {
+            return 1;
+        }
+
         return matchingAddresses.size();
     }
 }
