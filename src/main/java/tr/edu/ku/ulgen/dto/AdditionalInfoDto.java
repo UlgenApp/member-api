@@ -9,7 +9,6 @@ import lombok.Data;
  * @author Kaan Turkmen
  */
 @Data
-@AllArgsConstructor
 public class AdditionalInfoDto {
     private String additionalInfo;
 }
