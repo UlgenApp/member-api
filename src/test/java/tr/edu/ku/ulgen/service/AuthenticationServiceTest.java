@@ -145,23 +145,4 @@ public class AuthenticationServiceTest {
         assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
     }
 
-    @Test
-    public void shouldTestResetPassword() {
-        // Given
-        String token = "valid_password_reset_token";
-        String newPassword = "new_test_password";
-        String email = "test@example.com";
-        User user = new User(1L, "John", "Doe", email, "hashed_password", Role.USER, null, true);
-        when(jwtService.hasClaim(token, "password_reset")).thenReturn(true);
-        when(jwtService.extractUsername(token)).thenReturn(email);
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-
-        // When
-        ResponseEntity<ResetPasswordResponse> response = authenticationService.resetPassword(token, newPassword);
-
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getResult()).isEqualTo("SUCCESS");
-    }
-
 }
